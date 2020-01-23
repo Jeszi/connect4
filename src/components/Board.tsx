@@ -40,6 +40,7 @@ export class BoardComponent extends React.Component<
 
   addScore = (color: Color) => {
     if (color !== null) {
+      // we need to use never here, since dynamic keys are not handled well currently in ts compiler (this was the shortest workaround)
       this.setState<never>(prevState => ({
         [color]: prevState[color] + 1
       }));
