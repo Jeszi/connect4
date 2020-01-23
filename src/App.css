@@ -67,3 +67,27 @@
     transform: rotateY(180deg);
   }
 }
+
+.Footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.footer-button {
+  margin: 10px;
+  padding: 4px;
+  border-radius: 3px;
+  color: white;
+  background-color: red;
+  cursor: pointer;
+}
+.footer-button-green {
+  background-color: green;
+}
+
+.Scoreboard,
+th,
+td {
+  border: solid 1px black;
+}

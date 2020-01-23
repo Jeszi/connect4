@@ -3,18 +3,49 @@ import cn from "classnames";
 import { connect } from "react-redux";
 import { RootState } from "../reducers";
 import { getBoard, getCurrentPlayer, getWinner } from "../reducers/selectors";
-import { Row } from "./Row";
 import { dropCoin } from "../actions/dropCoin";
+import { resetGame } from "../actions/resetGame";
 import { Color } from "../types";
+import { Row } from "./Row";
+import { ScoreBoard } from "./ScoreBoard";
 
-interface Props {
+interface BoardComponentProps {
   board: ReturnType<typeof getBoard>;
   color: ReturnType<typeof getCurrentPlayer>;
   winner: ReturnType<typeof getWinner>;
   dropCoin: typeof dropCoin;
+  resetGame: typeof resetGame;
 }
 
-export class BoardComponent extends React.Component<Props> {
+interface BoardComponentState {
+  yellow: number;
+  red: number;
+}
+
+export class BoardComponent extends React.Component<
+  BoardComponentProps,
+  BoardComponentState
+> {
+  state = {
+    yellow: 0,
+    red: 0
+  };
+
+  componentDidUpdate(prevProps: BoardComponentProps) {
+    const { winner } = this.props;
+    if (winner !== prevProps.winner && winner !== null) {
+      this.addScore(winner.color);
+    }
+  }
+
+  addScore = (color: Color) => {
+    if (color !== null) {
+      this.setState<never>(prevState => ({
+        [color]: prevState[color] + 1
+      }));
+    }
+  };
+
   dropCoin = (column: number) => () => {
     // we only allow a player to drop a coin if there is no winner yet
     if (!this.props.winner) {
@@ -43,7 +74,23 @@ export class BoardComponent extends React.Component<Props> {
     );
   };
 
+  displayFooterAction = () => {
+    const { winner, resetGame } = this.props;
+
+    return (
+      <div
+        data-test-id="reset-button"
+        onClick={resetGame}
+        className={cn("footer-button", { "footer-button-green": winner })}
+      >
+        {winner ? "Play again" : "Start over"}
+      </div>
+    );
+  };
+
   render() {
+    const { yellow, red } = this.state;
+
     const classes = cn("Game-Board");
 
     return (
@@ -52,6 +99,10 @@ export class BoardComponent extends React.Component<Props> {
 
         <div className="Game">
           <div className={classes}>{this.props.board.map(this.displayRow)}</div>
+        </div>
+        <div className="Footer">
+          {this.displayFooterAction()}
+          <ScoreBoard yellowScore={yellow} redScore={red} />
         </div>
       </>
     );
@@ -64,4 +115,4 @@ const mapState = (state: RootState) => ({
   winner: getWinner(state)
 });
 
-export const Board = connect(mapState, { dropCoin })(BoardComponent);
+export const Board = connect(mapState, { dropCoin, resetGame })(BoardComponent);
